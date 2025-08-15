@@ -6,6 +6,7 @@ Persistent storage - your tasks save automatically
 Smooth animations when tasks reorder
 Smart print optimization - clean, professional printouts
 Notes section for additional planning
+
 Usage
 
 Download daily_task_planner.html
