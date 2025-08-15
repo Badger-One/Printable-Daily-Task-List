@@ -1,4 +1,3 @@
-Daily Task Planner
 A simple, self-contained HTML task planner with persistent storage and smooth animations.
 Features
 
@@ -29,6 +28,3 @@ Works offline
 Uses localStorage for persistence
 CSS animations with FLIP technique
 Responsive design
-
-License
-MIT License
