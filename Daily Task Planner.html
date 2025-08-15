@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Task Planner - Friday, August 15, 2025</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+            /* New: Hide empty tasks during print */
+            .print-hide-empty { display: none !important; }
+            /* Remove decorative border from notes section during printing */
+            .notes-section {
+                border: none !important;
+                background: transparent !important;
+            }
+            /* Remove resize handle from textarea during printing */
+            .notes-textarea {
+                resize: none !important;
+            }
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .planner-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #4a90e2;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .date-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .date-picker {
+            padding: 8px 12px;
+            border: 2px solid #4a90e2;
+            border-radius: 6px;
+            font-size: 1.1em;
+            background: white;
+            color: #2c3e50;
+        }
+        
+        .date-btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        
+        .date-btn:hover {
+            background: #357abd;
+        }
+        
+        .date {
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .day {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .tasks-section {
+            margin-bottom: 25px;
+        }
+        
+        .section-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .task-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            background: #4a90e2;
+            border-radius: 50%;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+        
+        .task-item:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #34495e;
+            border-radius: 3px;
+            margin-right: 12px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        
+        .task-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .task-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 1em;
+            color: #2c3e50;
+            outline: none;
+            min-height: 20px;
+            line-height: 1.4;
+        }
+        
+        .task-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .time-display {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        
+        .time-btn {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 1em;
+            cursor: pointer;
+            color: #495057;
+            transition: all 0.2s ease;
+        }
+        
+        .time-btn:hover {
+            background: #dee2e6;
+        }
+        
+        .time-btn.has-time {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .time-input {
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.9em;
+            width: 80px;
+        }
+        
+        .priority-selector {
+            margin-left: auto;
+        }
+        
+        .priority-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #dee2e6;
+            cursor: pointer;
+            margin: 0 8px;
+            transition: all 0.2s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .priority-btn:hover {
+            z-index: 2;
+        }
+        
+        .priority-btn.high { background: #e74c3c; border-color: #c0392b; }
+        .priority-btn.medium { background: #f39c12; border-color: #d68910; }
+        .priority-btn.low { background: #27ae60; border-color: #229954; }
+        .priority-btn.none { background: transparent; }
+        
+        .task-item.priority-high {
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .task-item.priority-medium {
+            border-left: 4px solid #f39c12;
+        }
+        
+        .task-item.priority-low {
+            border-left: 4px solid #27ae60;
+        }
+        
+        .notes-section {
+            margin-top: 30px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 5px;
+            padding: 20px;
+            background: #ecf0f1;
+        }
+        
+        .notes-header {
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 10px;
+        }
+        
+        .notes-textarea {
+            width: 100%;
+            height: 120px;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 1em;
+            color: #2c3e50;
+            resize: vertical;
+            outline: none;
+            line-height: 25px;
+            background-image: repeating-linear-gradient(
+                transparent,
+                transparent 24px,
+                #bdc3c7 24px,
+                #bdc3c7 25px
+            );
+        }
+        
+        .add-task-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-task-btn:hover {
+            background: #219a52;
+        }
+        
+        .print-btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        
+        .print-btn:hover {
+            background: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <div class="planner-container">
+        <div class="header">
+            <div class="date-controls no-print">
+                <input type="date" id="datePicker" class="date-picker no-print" value="2025-08-15">
+                <button class="date-btn no-print" onclick="setToday()">Today</button>
+            </div>
+            <div class="date" id="displayDate">August 15, 2025</div>
+            <div class="day" id="displayDay">Friday</div>
+        </div>
+        
+        <div class="tasks-section">
+            <div class="section-header">
+                <div class="task-icon"></div>
+                Today's Tasks
+            </div>
+            
+            <div class="task-item">
+                <div class="checkbox"></div>
+                <div class="task-content">
+                    <input type="text" class="task-input" placeholder="Add your task...">
+                    <div class="task-controls">
+                        <div class="time-display"></div>
+                        <button class="time-btn no-print" onclick="toggleTime(this)">⏰ Set Time</button>
+                        <div class="no-print" style="margin-left: auto; padding: 8px;">
+                            <!-- Priority buttons using proven inline style approach -->
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #dee2e6; background: transparent; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'none')" title="No Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #229954; background: #27ae60; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'low')" title="Low Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d68910; background: #f39c12; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'medium')" title="Medium Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #c0392b; background: #e74c3c; cursor: pointer; transition: all 0.2s ease;" onclick="setPriority(this, 'high')" title="High Priority"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="task-item">
+                <div class="checkbox"></div>
+                <div class="task-content">
+                    <input type="text" class="task-input" placeholder="Add your task...">
+                    <div class="task-controls">
+                        <div class="time-display"></div>
+                        <button class="time-btn no-print" onclick="toggleTime(this)">⏰ Set Time</button>
+                        <div class="no-print" style="margin-left: auto; padding: 8px;">
+                            <!-- Priority buttons using proven inline style approach -->
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #dee2e6; background: transparent; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'none')" title="No Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #229954; background: #27ae60; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'low')" title="Low Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d68910; background: #f39c12; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'medium')" title="Medium Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #c0392b; background: #e74c3c; cursor: pointer; transition: all 0.2s ease;" onclick="setPriority(this, 'high')" title="High Priority"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="task-item">
+                <div class="checkbox"></div>
+                <div class="task-content">
+                    <input type="text" class="task-input" placeholder="Add your task...">
+                    <div class="task-controls">
+                        <div class="time-display"></div>
+                        <button class="time-btn no-print" onclick="toggleTime(this)">⏰ Set Time</button>
+                        <div class="no-print" style="margin-left: auto; padding: 8px;">
+                            <!-- Priority buttons using proven inline style approach -->
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #dee2e6; background: transparent; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'none')" title="No Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #229954; background: #27ae60; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'low')" title="Low Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d68910; background: #f39c12; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'medium')" title="Medium Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #c0392b; background: #e74c3c; cursor: pointer; transition: all 0.2s ease;" onclick="setPriority(this, 'high')" title="High Priority"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="add-task-btn no-print" onclick="addTask()">
+                <span>➕</span> Add New Task
+            </button>
+        </div>
+        
+        <div class="notes-section">
+            <div class="notes-header">📝 Notes & Reminders</div>
+            <textarea class="notes-textarea" placeholder="Add your notes and reminders here..."></textarea>
+        </div>
+    </div>
+    
+    <div class="no-print" style="text-align: center;">
+        <button class="print-btn" onclick="smartPrint()">🖨️ Print Task List</button>
+        <button class="print-btn" onclick="clearAll()">🗑️ Clear All</button>
+    </div>
+    
+    <script>
+        // =====================================
+        // SIMPLE PERSISTENT STORAGE SYSTEM
+        // =====================================
+        
+        // Save current task data to localStorage
+        function saveTaskData() {
+            const taskData = {
+                tasks: [],
+                notes: document.querySelector('.notes-textarea').value
+            };
+            
+            // Collect all task information
+            document.querySelectorAll('.task-item').forEach(taskItem => {
+                const taskInput = taskItem.querySelector('.task-input');
+                const timeDisplay = taskItem.querySelector('.time-display');
+                const priority = taskItem.getAttribute('data-priority') || 'none';
+                
+                const task = {
+                    text: taskInput.value,
+                    time: timeDisplay.textContent,
+                    priority: priority
+                };
+                
+                taskData.tasks.push(task);
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('taskPlanner_data', JSON.stringify(taskData));
+        }
+        
+        // Load task data from localStorage
+        function loadTaskData() {
+            const savedData = localStorage.getItem('taskPlanner_data');
+            
+            if (savedData) {
+                const taskData = JSON.parse(savedData);
+                
+                // Load notes
+                document.querySelector('.notes-textarea').value = taskData.notes || '';
+                
+                // Load tasks
+                taskData.tasks.forEach((taskInfo, index) => {
+                    let taskItem;
+                    
+                    // Use existing task items or create new ones
+                    const existingTasks = document.querySelectorAll('.task-item');
+                    if (index < existingTasks.length) {
+                        taskItem = existingTasks[index];
+                    } else {
+                        addTask();
+                        taskItem = document.querySelector('.task-item:last-of-type');
+                    }
+                    
+                    // Set task content
+                    const taskInput = taskItem.querySelector('.task-input');
+                    const timeDisplay = taskItem.querySelector('.time-display');
+                    
+                    taskInput.value = taskInfo.text || '';
+                    timeDisplay.textContent = taskInfo.time || '';
+                    
+                    // Set priority
+                    taskItem.setAttribute('data-priority', taskInfo.priority || 'none');
+                    if (taskInfo.priority && taskInfo.priority !== 'none') {
+                        taskItem.classList.add('priority-' + taskInfo.priority);
+                    }
+                    
+                    // Update time button state
+                    const timeBtn = taskItem.querySelector('.time-btn');
+                    if (taskInfo.time) {
+                        timeBtn.textContent = '⏰ Edit Time';
+                        timeBtn.classList.add('has-time');
+                    }
+                    
+                    // Update priority button visual state
+                    updatePriorityButtonVisuals(taskItem, taskInfo.priority || 'none');
+                });
+                
+                // Resort tasks after loading
+                sortTasks();
+                console.log('Task data loaded successfully');
+            }
+        }
+        
+        // Helper function to update priority button visual state
+        function updatePriorityButtonVisuals(taskItem, priority) {
+            const priorityButtons = taskItem.querySelectorAll('div[onclick*="setPriority"]');
+            
+            // Reset all buttons
+            priorityButtons.forEach(btn => btn.style.transform = 'scale(1)');
+            
+            // Scale up the selected priority button
+            if (priority !== 'none') {
+                const priorityIndex = { 'none': 0, 'low': 1, 'medium': 2, 'high': 3 };
+                const selectedButton = priorityButtons[priorityIndex[priority]];
+                if (selectedButton) {
+                    selectedButton.style.transform = 'scale(1.2)';
+                }
+            } else {
+                priorityButtons[0].style.transform = 'scale(1.2)';
+            }
+        }
+        
+        // Enhanced clear all with confirmation for persistent data
+        function clearAllTasks(askConfirmation = true) {
+            if (askConfirmation) {
+                const confirmClear = confirm('This will clear all tasks and notes. Are you sure?');
+                if (!confirmClear) return;
+            }
+            
+            const inputs = document.querySelectorAll('.task-input');
+            const timeDisplays = document.querySelectorAll('.time-display');
+            const taskItems = document.querySelectorAll('.task-item');
+            const notesTextarea = document.querySelector('.notes-textarea');
+            
+            inputs.forEach(input => input.value = '');
+            timeDisplays.forEach(display => display.textContent = '');
+            taskItems.forEach(item => {
+                item.classList.remove('priority-high', 'priority-medium', 'priority-low');
+                item.setAttribute('data-priority', 'none');
+            });
+            
+            // Clear notes section
+            if (notesTextarea) {
+                notesTextarea.value = '';
+            }
+            
+            // Reset time buttons
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.textContent = '⏰ Set Time';
+                btn.classList.remove('has-time', 'editing');
+            });
+            
+            // Reset priority button scaling
+            document.querySelectorAll('div[onclick*="setPriority"]').forEach(btn => {
+                btn.style.transform = 'scale(1)';
+            });
+            
+            // Sort tasks after clearing and save the cleared state
+            sortTasks();
+            saveTaskData();
+        }
+        
+        // Auto-save functionality - save data whenever anything changes
+        function setupAutoSave() {
+            // Save when tasks or notes change
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('task-input') || 
+                    e.target.classList.contains('notes-textarea')) {
+                    // Debounce saving to avoid excessive localStorage writes
+                    clearTimeout(window.saveTimeout);
+                    window.saveTimeout = setTimeout(saveTaskData, 500);
+                }
+            });
+        }
+        
+        // Date Management Functions
+        function updateDateDisplay() {
+            const datePicker = document.getElementById('datePicker');
+            const selectedDate = new Date(datePicker.value + 'T00:00:00');
+            
+            // Format the date display
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = selectedDate.toLocaleDateString('en-US', options);
+            
+            // Format the day display
+            const dayOptions = { weekday: 'long' };
+            const formattedDay = selectedDate.toLocaleDateString('en-US', dayOptions);
+            
+            document.getElementById('displayDate').textContent = formattedDate;
+            document.getElementById('displayDay').textContent = formattedDay.toUpperCase();
+        }
+        
+        function setToday() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            
+            document.getElementById('datePicker').value = `${year}-${month}-${day}`;
+            updateDateDisplay();
+        }
+        
+        // Task Management Functions
+        function toggleTime(button) {
+            const timeDisplay = button.parentElement.querySelector('.time-display');
+            const isEditing = button.classList.contains('editing');
+            
+            if (isEditing) {
+                // Save the time
+                const input = button.parentElement.querySelector('.time-input');
+                const timeValue = input.value;
+                input.remove();
+                
+                if (timeValue) {
+                    timeDisplay.textContent = timeValue;
+                    button.textContent = '⏰ Edit Time';
+                    button.classList.add('has-time');
+                } else {
+                    timeDisplay.textContent = '';
+                    button.textContent = '⏰ Set Time';
+                    button.classList.remove('has-time');
+                }
+                button.classList.remove('editing');
+                
+                // Trigger sorting after time change
+                sortTasks();
+                
+                // Auto-save changes
+                saveTaskData();
+            } else {
+                // Start editing
+                const currentTime = timeDisplay.textContent;
+                const input = document.createElement('input');
+                input.type = 'time';
+                input.className = 'time-input';
+                input.value = currentTime || '';
+                
+                button.parentElement.insertBefore(input, button);
+                input.focus();
+                
+                button.textContent = '✓ Save';
+                button.classList.add('editing');
+                
+                // Save on Enter or blur
+                input.addEventListener('blur', () => toggleTime(button));
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        input.blur();
+                    }
+                });
+            }
+        }
+        
+        function setPriority(element, priority) {
+            const taskItem = element.closest('.task-item');
+            const priorityContainer = element.parentElement;
+            const allPriorityBtns = priorityContainer.querySelectorAll('div[onclick*="setPriority"]');
+            
+            // Reset all priority classes on the task item
+            taskItem.classList.remove('priority-high', 'priority-medium', 'priority-low');
+            
+            // Reset all button scaling
+            allPriorityBtns.forEach(btn => btn.style.transform = 'scale(1)');
+            
+            // Set new priority class on task item for sorting
+            if (priority !== 'none') {
+                taskItem.classList.add('priority-' + priority);
+            }
+            
+            // Store priority as data attribute for sorting
+            taskItem.setAttribute('data-priority', priority);
+            
+            // Visual feedback - scale up the clicked button
+            element.style.transform = 'scale(1.2)';
+            
+            // Trigger sorting after priority change
+            sortTasks();
+            
+            // Auto-save changes
+            saveTaskData();
+        }
+        
+        // Advanced Sorting Logic with Smooth Transitions
+        function sortTasks() {
+            const tasksContainer = document.querySelector('.tasks-section');
+            const addButton = tasksContainer.querySelector('.add-task-btn');
+            const taskItems = Array.from(tasksContainer.querySelectorAll('.task-item'));
+            
+            // Step 1: Capture current positions of all task elements (FLIP technique - First)
+            const elementPositions = new Map();
+            taskItems.forEach(task => {
+                const rect = task.getBoundingClientRect();
+                elementPositions.set(task, {
+                    top: rect.top,
+                    left: rect.left
+                });
+            });
+            
+            // Step 2: Perform the sorting logic (same as before)
+            // Separate tasks into two groups: timed and untimed
+            const timedTasks = [];
+            const untimedTasks = [];
+            
+            taskItems.forEach(task => {
+                const timeDisplay = task.querySelector('.time-display');
+                const hasTime = timeDisplay && timeDisplay.textContent.trim() !== '';
+                
+                if (hasTime) {
+                    timedTasks.push({
+                        element: task,
+                        time: timeDisplay.textContent.trim()
+                    });
+                } else {
+                    const priority = task.getAttribute('data-priority') || 'none';
+                    untimedTasks.push({
+                        element: task,
+                        priority: priority
+                    });
+                }
+            });
+            
+            // Sort timed tasks by time (earliest first)
+            timedTasks.sort((a, b) => {
+                return a.time.localeCompare(b.time);
+            });
+            
+            // Sort untimed tasks by priority (high to low)
+            const priorityOrder = { 'high': 4, 'medium': 3, 'low': 2, 'none': 1 };
+            untimedTasks.sort((a, b) => {
+                return priorityOrder[b.priority] - priorityOrder[a.priority];
+            });
+            
+            // Reorder tasks in the DOM: timed tasks first, then untimed tasks
+            const sortedTasks = [...timedTasks, ...untimedTasks];
+            
+            // Step 3: Reorder elements in DOM to their final positions (FLIP technique - Last)
+            taskItems.forEach(task => task.remove());
+            sortedTasks.forEach(taskObj => {
+                tasksContainer.insertBefore(taskObj.element, addButton);
+            });
+            
+            // Step 4: Measure new positions and animate the transitions (FLIP technique - Invert & Play)
+            sortedTasks.forEach(taskObj => {
+                const task = taskObj.element;
+                const oldPosition = elementPositions.get(task);
+                const newRect = task.getBoundingClientRect();
+                
+                // Calculate the distance each element needs to move
+                const deltaY = oldPosition.top - newRect.top;
+                const deltaX = oldPosition.left - newRect.left;
+                
+                // Only animate if the element has actually moved
+                if (deltaY !== 0 || deltaX !== 0) {
+                    // Set initial position to where the element was before
+                    task.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                    task.style.transition = 'none'; // Disable transitions temporarily
+                    
+                    // Force a repaint to apply the initial transform
+                    task.offsetHeight;
+                    
+                    // Enable smooth transition and animate to final position
+                    task.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.8, 0.3, 1)';
+                    task.style.transform = 'translate(0, 0)';
+                    
+                    // Clean up after animation completes
+                    setTimeout(() => {
+                        task.style.transition = '';
+                        task.style.transform = '';
+                    }, 400); // Match the transition duration
+                }
+            });
+        }
+        
+        function addTask() {
+            const tasksSection = document.querySelector('.tasks-section');
+            const addButton = tasksSection.querySelector('.add-task-btn');
+            
+            const taskItem = document.createElement('div');
+            taskItem.className = 'task-item';
+            taskItem.setAttribute('data-priority', 'none');
+            
+            // Create new task with inline-styled priority buttons (proven approach)
+            taskItem.innerHTML = `
+                <div class="checkbox"></div>
+                <div class="task-content">
+                    <input type="text" class="task-input" placeholder="Add your task...">
+                    <div class="task-controls">
+                        <div class="time-display"></div>
+                        <button class="time-btn no-print" onclick="toggleTime(this)">⏰ Set Time</button>
+                        <div class="no-print" style="margin-left: auto; padding: 8px;">
+                            <!-- Priority buttons using proven inline style approach -->
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #dee2e6; background: transparent; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'none')" title="No Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #229954; background: #27ae60; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'low')" title="Low Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d68910; background: #f39c12; cursor: pointer; margin-right: 15px; transition: all 0.2s ease;" onclick="setPriority(this, 'medium')" title="Medium Priority"></div>
+                            <div style="display: inline-block; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #c0392b; background: #e74c3c; cursor: pointer; transition: all 0.2s ease;" onclick="setPriority(this, 'high')" title="High Priority"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            tasksSection.insertBefore(taskItem, addButton);
+            
+            // Focus on the new task input for immediate typing
+            taskItem.querySelector('.task-input').focus();
+            
+            // Sort tasks after adding (new task will go to appropriate position)
+            sortTasks();
+            
+            // Auto-save after adding new task
+            saveTaskData();
+        }
+        
+        // Update clearAll to use the new clearAllTasks function
+        function clearAll() {
+            clearAllTasks(true);
+        }
+        
+        // Enhanced Smart Print Function - This is the new solution!
+        function smartPrint() {
+            // Step 1: Identify all elements that should be hidden during print
+            const emptyTasksToHide = [];
+            const notesSection = document.querySelector('.notes-section');
+            const notesTextarea = document.querySelector('.notes-textarea');
+            const addTaskButton = document.querySelector('.add-task-btn');
+            
+            // Step 2: Analyze each task item to see if it contains meaningful content
+            document.querySelectorAll('.task-item').forEach(taskItem => {
+                const taskInput = taskItem.querySelector('.task-input');
+                const taskText = taskInput.value.trim();
+                const timeDisplay = taskItem.querySelector('.time-display');
+                const hasTime = timeDisplay && timeDisplay.textContent.trim() !== '';
+                
+                // A task is considered "empty" if it has no text content and no time
+                // We check against placeholder text or empty strings
+                const isEmpty = taskText === '' || taskText === taskInput.placeholder;
+                const hasNoTime = !hasTime;
+                
+                if (isEmpty && hasNoTime) {
+                    emptyTasksToHide.push(taskItem);
+                }
+            });
+            
+            // Step 3: Check if notes section has meaningful content
+            const notesText = notesTextarea.value.trim();
+            const notesIsEmpty = notesText === '' || notesText === notesTextarea.placeholder;
+            
+            // Step 4: Temporarily hide empty elements and interactive buttons for printing
+            // We use the new CSS class we added: .print-hide-empty
+            emptyTasksToHide.forEach(task => {
+                task.classList.add('print-hide-empty');
+            });
+            
+            // Step 4a: Temporarily hide the Add New Task button using inline styling
+            // This provides the highest CSS authority, building on our systematic discoveries
+            let originalAddButtonDisplay = '';
+            if (addTaskButton) {
+                originalAddButtonDisplay = addTaskButton.style.display;
+                addTaskButton.style.display = 'none';
+            }
+            
+            // If notes are empty, temporarily hide the placeholder text
+            let originalNotesPlaceholder = '';
+            if (notesIsEmpty) {
+                originalNotesPlaceholder = notesTextarea.placeholder;
+                notesTextarea.placeholder = '';
+            }
+            
+            // Step 5: Execute the print command
+            // The browser will now use our CSS media query which hides .print-hide-empty elements
+            // and the inline styling will hide the Add New Task button
+            window.print();
+            
+            // Step 6: Restore the original state after printing
+            // This happens after the print dialog closes
+            setTimeout(() => {
+                // Restore visibility of temporarily hidden tasks
+                emptyTasksToHide.forEach(task => {
+                    task.classList.remove('print-hide-empty');
+                });
+                
+                // Restore the Add New Task button's original display state
+                if (addTaskButton) {
+                    addTaskButton.style.display = originalAddButtonDisplay;
+                }
+                
+                // Restore original placeholder text if we modified it
+                if (notesIsEmpty && originalNotesPlaceholder) {
+                    notesTextarea.placeholder = originalNotesPlaceholder;
+                }
+            }, 100); // Small delay to ensure print dialog has processed
+        }
+        
+        // Initialize the application when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const datePicker = document.getElementById('datePicker');
+            datePicker.addEventListener('change', updateDateDisplay);
+            
+            // Initialize existing tasks with priority data
+            document.querySelectorAll('.task-item').forEach(task => {
+                task.setAttribute('data-priority', 'none');
+            });
+            
+            // Set up the storage system
+            setupAutoSave();
+            
+            // Load any saved data
+            loadTaskData();
+            
+            // Update the date display
+            updateDateDisplay();
+            
+            console.log('Task Planner with simple persistent storage initialized successfully!');
+        });
+    </script>
+</body>
+</html>
